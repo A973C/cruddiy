@@ -26,7 +26,17 @@ if(isset($_POST['index'])) {
 	if (!file_exists('app'))
 		mkdir('app', 0777, true);
 
-	$configfile = fopen("app/config.php", "w") or die("Unable to open file!");
+
+    $helpersfilename = 'helpers.php';
+    $handle = fopen('helpers.php', "r") or die("Unable to open Helpers file!");;
+    $helpers = fread($handle, filesize($helpersfilename));
+    fclose($handle);
+
+    $helpersfile = fopen("app/".$helpersfilename, "w") or die("Unable to create Helpers file!");
+    fwrite($helpersfile, $helpers);
+	fclose($helpersfile);
+
+	$configfile = fopen("app/config.php", "w") or die("Unable to open Config file!");
 	$txt  = "<?php \n";
 	$txt .= "\$db_server = '$server'; \n";
 	$txt .= "\$db_name = '$database'; \n";
@@ -34,6 +44,19 @@ if(isset($_POST['index'])) {
 	$txt .= "\$db_password = '$password'; \n";
 	$txt .= "\$no_of_records_per_page = $numrecordsperpage; \n\n";
 	$txt .= "\$link = mysqli_connect(\$db_server, \$db_user, \$db_password, \$db_name); \n";
+
+    $txt .= '$query = "SHOW VARIABLES LIKE \'character_set_database\'";' ."\n";
+    $txt .= 'if ($result = mysqli_query($link, $query)) {' ."\n";
+    $txt .= '    while ($row = mysqli_fetch_row($result)) {' ."\n";
+    $txt .= '        if (!$link->set_charset($row[1])) {' ."\n";
+    $txt .= '            printf("Error loading character set $row[1]: %s\n", $link->error);' ."\n";
+    $txt .= '            exit();' ."\n";
+    $txt .= '        } else {' ."\n";
+    $txt .= '            // printf("Current character set: %s", $link->character_set_name());' ."\n";
+    $txt .= '        }' ."\n";
+    $txt .= '    }' ."\n";
+    $txt .= '}' ."\n";
+
 	$txt .= "\n?>";
 	fwrite($configfile, $txt);
 	fclose($configfile);
