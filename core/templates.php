@@ -96,12 +96,12 @@ $indexfile = <<<'EOT'
                     if(!empty($_GET['search'])) {
                         $search = ($_GET['search']);
                         $sql = "SELECT * FROM {TABLE_NAME}
-                            WHERE CONCAT ({INDEX_CONCAT_SEARCH_FIELDS})
+                            WHERE CONCAT_WS ({INDEX_CONCAT_SEARCH_FIELDS})
                             LIKE '%$search%'
                             ORDER BY $order $sort
                             LIMIT $offset, $no_of_records_per_page";
                         $count_pages = "SELECT * FROM {TABLE_NAME}
-                            WHERE CONCAT ({INDEX_CONCAT_SEARCH_FIELDS})
+                            WHERE CONCAT_WS ({INDEX_CONCAT_SEARCH_FIELDS})
                             LIKE '%$search%'
                             ORDER BY $order $sort";
                     }
@@ -363,6 +363,7 @@ require_once "helpers.php";
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
+        {CREATE_POST_VARIABLES}
 
         $dsn = "mysql:host=$db_server;dbname=$db_name;charset=utf8mb4";
         $options = [
@@ -439,6 +440,8 @@ require_once "helpers.php";
 if(isset($_POST["{COLUMN_ID}"]) && !empty($_POST["{COLUMN_ID}"])){
     // Get hidden input value
     ${COLUMN_ID} = $_POST["{COLUMN_ID}"];
+
+    {CREATE_POST_VARIABLES}
 
     // Prepare an update statement
     $dsn = "mysql:host=$db_server;dbname=$db_name;charset=utf8mb4";
@@ -614,5 +617,3 @@ $startfile = <<<'EOT'
 </body>
 </html>
 EOT;
-
-?>
